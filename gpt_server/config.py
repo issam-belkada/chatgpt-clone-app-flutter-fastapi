@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 from functools import lru_cache
 import os
 
@@ -23,10 +24,9 @@ class Settings(BaseSettings):
     
     # Gemini Settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = "gemini-pro"
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
     
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
 @lru_cache()
 def get_settings():

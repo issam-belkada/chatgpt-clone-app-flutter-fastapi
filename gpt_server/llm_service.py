@@ -45,7 +45,7 @@ class LLMService:
                     }
                 }
                 
-                url = f"https://generativelanguage.googleapis.com/v1/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}"
                 
                 async with session.post(url, json=data, headers=headers) as response:
                     if response.status == 200:

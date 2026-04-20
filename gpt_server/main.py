@@ -1,6 +1,8 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from typing import Annotated
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from sqlalchemy.orm import Session
 import schemas
@@ -11,15 +13,28 @@ import models
 from config import get_settings
 from llm_service import LLMService
 
-# Initialize FastAPI app
+# Get settings
+settings = get_settings()
+
+# Error message constants
+USER_NOT_FOUND = "User not found"
+CONVERSATION_NOT_FOUND = "Conversation not found"
+NOT_AUTHORIZED = "Not authorized to access this conversation"
+
+# Lifespan context manager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    database.init_db()
+    yield
+
+# Initialize FastAPI app with lifespan
 app = FastAPI(
     title="ChatGPT Clone API",
     description="A complete ChatGPT clone API built with FastAPI",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
-
-# Get settings
-settings = get_settings()
 
 # Add CORS middleware
 app.add_middleware(
@@ -30,17 +45,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize database
-@app.on_event("startup")
-async def startup():
-    database.init_db()
-
 # ============================================================================
 # AUTH ENDPOINTS
 # ============================================================================
 
 @app.post("/api/v1/auth/register", response_model=schemas.User, tags=["Auth"])
-async def register(user_data: schemas.RegisterRequest, db: Session = Depends(database.get_db)):
+async def register(user_data: schemas.RegisterRequest, db: Annotated[Session, Depends(database.get_db)]):
     """Register a new user."""
     # Check if user already exists
     db_user = crud.get_user_by_username(db, user_data.username)
@@ -63,8 +73,8 @@ async def register(user_data: schemas.RegisterRequest, db: Session = Depends(dat
 
 @app.post("/api/v1/auth/login", response_model=schemas.Token, tags=["Auth"])
 async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(database.get_db)
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Login user and get tokens."""
     # Find user
@@ -103,15 +113,15 @@ async def login(
 
 @app.get("/api/v1/auth/me", response_model=schemas.User, tags=["Auth"])
 async def get_current_user_info(
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Get current user information."""
     user = crud.get_user_by_username(db, current_user.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=USER_NOT_FOUND
         )
     return user
 
@@ -121,17 +131,17 @@ async def get_current_user_info(
 
 @app.get("/api/v1/conversations", response_model=list[schemas.Conversation], tags=["Conversations"])
 async def get_conversations(
-    skip: int = 0,
-    limit: int = 10,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)],
+    skip: Annotated[int, Query()] = 0,
+    limit: Annotated[int, Query()] = 10
 ):
     """Get all conversations for current user."""
     user = crud.get_user_by_username(db, current_user.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=USER_NOT_FOUND
         )
     
     conversations = crud.get_user_conversations(db, user.id, skip, limit)
@@ -139,16 +149,16 @@ async def get_conversations(
 
 @app.post("/api/v1/conversations", response_model=schemas.Conversation, tags=["Conversations"])
 async def create_conversation(
-    conversation_data: schemas.ConversationCreate,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)],
+    conversation_data: schemas.ConversationCreate = Body(...)
 ):
     """Create a new conversation."""
     user = crud.get_user_by_username(db, current_user.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=USER_NOT_FOUND
         )
     
     conversation = crud.create_conversation(
@@ -161,15 +171,15 @@ async def create_conversation(
 @app.get("/api/v1/conversations/{conversation_id}", response_model=schemas.Conversation, tags=["Conversations"])
 async def get_conversation(
     conversation_id: int,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Get a specific conversation."""
     conversation = crud.get_conversation(db, conversation_id)
     if not conversation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+            detail=CONVERSATION_NOT_FOUND
         )
     
     # Verify ownership
@@ -177,7 +187,7 @@ async def get_conversation(
     if conversation.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to access this conversation"
+            detail=NOT_AUTHORIZED
         )
     
     return conversation
@@ -186,15 +196,15 @@ async def get_conversation(
 async def update_conversation(
     conversation_id: int,
     conversation_data: schemas.ConversationCreate,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Update conversation title."""
     conversation = crud.get_conversation(db, conversation_id)
     if not conversation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+            detail=CONVERSATION_NOT_FOUND
         )
     
     # Verify ownership
@@ -202,7 +212,7 @@ async def update_conversation(
     if conversation.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to update this conversation"
+            detail=NOT_AUTHORIZED
         )
     
     updated = crud.update_conversation_title(db, conversation_id, conversation_data.title)
@@ -211,15 +221,15 @@ async def update_conversation(
 @app.delete("/api/v1/conversations/{conversation_id}", tags=["Conversations"])
 async def delete_conversation(
     conversation_id: int,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Delete a conversation."""
     conversation = crud.get_conversation(db, conversation_id)
     if not conversation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+            detail=CONVERSATION_NOT_FOUND
         )
     
     # Verify ownership
@@ -227,7 +237,7 @@ async def delete_conversation(
     if conversation.user_id != user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this conversation"
+            detail=NOT_AUTHORIZED
         )
     
     crud.delete_conversation(db, conversation_id)
@@ -240,15 +250,15 @@ async def delete_conversation(
 @app.post("/api/v1/chat", response_model=schemas.ChatResponse, tags=["Chat"])
 async def chat(
     chat_request: schemas.ChatRequest,
-    current_user: schemas.TokenData = Depends(auth.get_current_user),
-    db: Session = Depends(database.get_db)
+    current_user: Annotated[schemas.TokenData, Depends(auth.get_current_user)],
+    db: Annotated[Session, Depends(database.get_db)]
 ):
     """Send a message and get a response."""
     user = crud.get_user_by_username(db, current_user.username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail=USER_NOT_FOUND
         )
     
     # Create or get conversation
@@ -257,12 +267,12 @@ async def chat(
         if not conversation:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Conversation not found"
+                detail=CONVERSATION_NOT_FOUND
             )
         if conversation.user_id != user.id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Not authorized to access this conversation"
+                detail=NOT_AUTHORIZED
             )
     else:
         conversation = crud.create_conversation(db, user.id)
@@ -323,4 +333,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8002)
+    uvicorn.run(app, host="127.0.0.1", port=8002)
