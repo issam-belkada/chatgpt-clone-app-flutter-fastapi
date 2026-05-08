@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/models.dart';
 
 class ApiService {
-  static const String _defaultBaseUrl = 'http://localhost:8002/api/v1';
+  static const String _defaultBaseUrl = 'http://192.168.177.171:8000/api/v1';
   static final String baseUrl = const String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: _defaultBaseUrl,
