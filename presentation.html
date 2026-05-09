@@ -585,7 +585,7 @@
       <div class="anim-up anim-up-d3" style="margin-top:30px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
         <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;">
           <i class="fa-brands fa-github"></i>
-          <span class="mono" style="font-size:12px;">issam-belkadia/chatgpt-clone</span>
+          <span class="mono" style="font-size:12px;">issam-belkada/chatgpt-clone</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;">
           <i class="fa-solid fa-server"></i> Port 8000
@@ -725,13 +725,13 @@
           <div class="card">
             <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-folder-tree"></i> Project Structure</h4>
             <div class="code-block" style="font-size:12px;line-height:1.8;">
-<span class="cm">gpt_server/</span>
-├── main.py          <span class="cm"># Routes & app config</span>
-├── models.py        <span class="cm"># SQLAlchemy models</span>
-├── auth.py          <span class="cm"># JWT & password hashing</span>
-├── config.py        <span class="cm"># Environment settings</span>
-├── llm_service.py   <span class="cm"># Multi-provider LLM</span>
-├── database.py      <span class="cm"># DB connection setup</span>
+<span class="cm">gpt_server/</span><br/>
+├── main.py          <span class="cm"># Routes & app config</span><br/>
+├── models.py        <span class="cm"># SQLAlchemy models</span><br/>
+├── auth.py          <span class="cm"># JWT & password hashing</span><br/>
+├── config.py        <span class="cm"># Environment settings</span><br/>
+├── llm_service.py   <span class="cm"># Multi-provider LLM</span><br/>
+├── database.py      <span class="cm"># DB connection setup</span><br/>
 └── requirements.txt
             </div>
           </div>
@@ -741,25 +741,25 @@
           <div class="card" style="flex:1;">
             <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-gear"></i> Configuration (config.py)</h4>
             <div class="code-block" style="font-size:12px;line-height:1.8;">
-<span class="kw">class</span> <span class="type">Settings</span>:
-    APP_NAME: <span class="type">str</span> = <span class="str">"ChatGPT Clone"</span>
-    VERSION: <span class="type">str</span> = <span class="str">"1.0.0"</span>
-    DEBUG: <span class="type">bool</span> = <span class="kw">True</span>
+<span class="kw">class</span> <span class="type">Settings</span>:<br/>
+    APP_NAME: <span class="type">str</span> = <span class="str">"ChatGPT Clone"</span><br/>
+    VERSION: <span class="type">str</span> = <span class="str">"1.0.0"</span><br/>
+    DEBUG: <span class="type">bool</span> = <span class="kw">True</span><br/>
 
-    <span class="cm"># Database</span>
-    DATABASE_URL: <span class="type">str</span> = <span class="str">"sqlite:///./chat.db"</span>
+    <span class="cm"># Database</span><br/>
+    DATABASE_URL: <span class="type">str</span> = <span class="str">"sqlite:///./chat.db"</span><br/>
 
-    <span class="cm"># JWT</span>
-    SECRET_KEY: <span class="type">str</span>  <span class="cm"># from env</span>
-    ALGORITHM: <span class="type">str</span> = <span class="str">"HS256"</span>
-    ACCESS_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">30</span>  <span class="cm"># minutes</span>
-    REFRESH_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">7</span>   <span class="cm"># days</span>
+    <span class="cm"># JWT</span><br/>
+    SECRET_KEY: <span class="type">str</span>  <span class="cm"># from env</span><br/>
+    ALGORITHM: <span class="type">str</span> = <span class="str">"HS256"</span><br/>
+    ACCESS_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">30</span>  <span class="cm"># minutes</span><br/>
+    REFRESH_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">7</span>   <span class="cm"># days</span><br/>
 
-    <span class="cm"># LLM Providers</span>
-    GEMINI_API_KEY: <span class="type">str</span>
-    GEMINI_MODEL: <span class="type">str</span>
-    GROQ_API_KEY: <span class="type">str</span>
-    GROQ_MODEL: <span class="type">str</span>
+    <span class="cm"># LLM Providers</span><br/>
+    GEMINI_API_KEY: <span class="type">str</span><br/>
+    GEMINI_MODEL: <span class="type">str</span><br/>
+    GROQ_API_KEY: <span class="type">str</span><br/>
+    GROQ_MODEL: <span class="type">str</span><br/>
             </div>
           </div>
         </div>
@@ -783,20 +783,20 @@
           <div class="card">
             <h4 style="color:var(--violet);margin-bottom:12px;"><i class="fa-solid fa-sitemap"></i> Project Structure</h4>
             <div class="code-block" style="font-size:12px;line-height:1.8;">
-<span class="cm">lib/</span>
-├── main.dart             <span class="cm"># MultiProvider setup</span>
-├── screens/
-│   ├── login_screen.dart
-│   ├── register_screen.dart
-│   ├── chat_screen.dart
-│   └── conversations_screen.dart
-├── providers/
-│   ├── auth_provider.dart
-│   ├── conversation_provider.dart
-│   └── chat_provider.dart
-├── models/               <span class="cm"># JSON serializable</span>
-└── services/
-    └── api_service.dart  <span class="cm"># HTTP wrapper</span>
+<span class="cm">lib/</span><br/>
+├── main.dart             <span class="cm"># MultiProvider setup</span><br/>
+├── screens/<br/>
+│   ├── login_screen.dart<br/>
+│   ├── register_screen.dart<br/>
+│   ├── chat_screen.dart<br/>
+│   └── conversations_screen.dart<br/>
+├── providers/<br/>
+│   ├── auth_provider.dart<br/>
+│   ├── conversation_provider.dart<br/>
+│   └── chat_provider.dart<br/>
+├── models/               <span class="cm"># JSON serializable</span><br/>
+└── services/<br/>
+    └── api_service.dart  <span class="cm"># HTTP wrapper</span><br/>
             </div>
           </div>
 
@@ -886,28 +886,28 @@
           <div class="card">
             <h4 style="color:var(--cyan);margin-bottom:12px;"><i class="fa-solid fa-code"></i> Auth Implementation</h4>
             <div class="code-block" style="font-size:12px;line-height:1.7;">
-<span class="decorator">@router.post</span>(<span class="str">"/auth/login"</span>)
-<span class="kw">async def</span> <span class="fn">login</span>(form_data: OAuth2PasswordRequestForm):
-    user = <span class="kw">await</span> <span class="fn">authenticate_user</span>(
-        form_data.username,
-        form_data.password
-    )
-    <span class="kw">if not</span> user:
-        <span class="kw">raise</span> HTTPException(
-            status_code=<span class="num">401</span>,
-            detail=<span class="str">"Invalid credentials"</span>
-        )
-    access_token = <span class="fn">create_access_token</span>(
-        data={<span class="str">"sub"</span>: user.username}
-    )
-    refresh_token = <span class="fn">create_refresh_token</span>(
-        data={<span class="str">"sub"</span>: user.username}
-    )
-    <span class="kw">return</span> {
-        <span class="str">"access_token"</span>: access_token,
-        <span class="str">"refresh_token"</span>: refresh_token,
-        <span class="str">"token_type"</span>: <span class="str">"bearer"</span>
-    }
+<span class="decorator">@router.post</span>(<span class="str">"/auth/login"</span>)<br/>
+<span class="kw">async def</span> <span class="fn">login</span>(form_data: OAuth2PasswordRequestForm):<br/>
+    user = <span class="kw">await</span> <span class="fn">authenticate_user</span>(<br/>
+        form_data.username,<br/>
+        form_data.password<br/>
+    )<br/>
+    <span class="kw">if not</span> user:<br/>
+        <span class="kw">raise</span> HTTPException(<br/>
+            status_code=<span class="num">401</span>,<br/>
+            detail=<span class="str">"Invalid credentials"</span><br/>
+        )<br/>
+    access_token = <span class="fn">create_access_token</span>(<br/>
+        data={<span class="str">"sub"</span>: user.username}<br/>
+    )<br/>
+    refresh_token = <span class="fn">create_refresh_token</span>(<br/>
+        data={<span class="str">"sub"</span>: user.username}<br/>
+    )<br/>
+    <span class="kw">return</span> {<br/>
+        <span class="str">"access_token"</span>: access_token,<br/>
+        <span class="str">"refresh_token"</span>: refresh_token,<br/>
+        <span class="str">"token_type"</span>: <span class="str">"bearer"</span><br/>
+    }<br/>
             </div>
           </div>
 
@@ -1592,7 +1592,7 @@ CORS_ORIGINS=<span class="str">https://yourdomain.com</span>
         <h2 style="font-size:clamp(28px,4vw,40px);">Questions & Discussion</h2>
         <p class="subtitle" style="margin-top:8px;">Let's dive deeper into any aspect of the architecture</p>
         <div style="margin-top:24px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
-          <a href="https://github.com/issam-belkadia/chatgpt-clone-app-flutter-fastapi" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--accent-dim);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:600;font-size:14px;transition:all 0.2s;">
+          <a href="https://github.com/issam-belkada/chatgpt-clone-app-flutter-fastapi" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--accent-dim);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:600;font-size:14px;transition:all 0.2s;">
             <i class="fa-brands fa-github"></i> View on GitHub
           </a>
           <div style="display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;">
