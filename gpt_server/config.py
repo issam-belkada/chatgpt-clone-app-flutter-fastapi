@@ -27,6 +27,18 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
     
     model_config = ConfigDict(env_file=".env", extra="ignore")
+    
+    # DeepSeek
+    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
+    DEEPSEEK_MODEL: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
+    
+    model_config = ConfigDict(env_file=".env", extra="ignore")
+    
+    # Grok Settings
+    GROK_API_KEY: str = os.getenv("GROK_API_KEY", "")
+    GROK_MODEL: str = os.getenv("GROK_MODEL", "grok-beta")
+    
+    model_config = ConfigDict(env_file=".env", extra="ignore")
 
 @lru_cache()
 def get_settings():

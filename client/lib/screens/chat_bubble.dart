@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+/// Simple reusable bubble — used if you render messages outside ChatScreen.
+/// ChatScreen itself renders _MessageRow inline, which matches the GPT layout
+/// (no bubble for assistant, pill bubble for user).
 class ChatBubble extends StatelessWidget {
   final String text;
   final bool isUser;
@@ -12,47 +15,57 @@ class ChatBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = isUser ? const Color(0xFF1f7a1f) : const Color(0xFF2e2e2e);
-    final align = isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    final radius = isUser
-        ? const BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
-            bottomLeft: Radius.circular(18),
-          )
-        : const BorderRadius.only(
-            topLeft: Radius.circular(18),
-            topRight: Radius.circular(18),
-            bottomRight: Radius.circular(18),
-          );
-
-    return Column(
-      crossAxisAlignment: align,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          padding: const EdgeInsets.all(14),
-          constraints: const BoxConstraints(maxWidth: 300),
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: radius,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.12),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
+    if (isUser) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Container(
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2F2F2F),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                child: Text(
+                  text,
+                  style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.45),
+                ),
               ),
-            ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Assistant — no bubble, avatar + plain text
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            margin: const EdgeInsets.only(top: 2, right: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF10A37F),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 15),
           ),
-          child: Text(
-            text,
-            style: const TextStyle(
-              color: Colors.white,
-              height: 1.4,
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Color(0xFFECECEC), fontSize: 15, height: 1.6),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
