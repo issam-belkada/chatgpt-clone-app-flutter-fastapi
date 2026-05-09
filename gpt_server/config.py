@@ -9,36 +9,29 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = True
-    
+
     # Database
     DATABASE_URL: str = "sqlite:///./chatgpt.db"
-    
+
     # JWT Settings
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-this-in-production")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    
-    # CORS settings
+
+    # CORS
     CORS_ORIGINS: list = ["*"]
-    
-    # Gemini Settings
+
+    # Gemini
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash-exp")
-    
+
+    # Groq
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
     model_config = ConfigDict(env_file=".env", extra="ignore")
-    
-    # DeepSeek
-    DEEPSEEK_API_KEY: str = os.getenv("DEEPSEEK_API_KEY", "")
-    DEEPSEEK_MODEL: str = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
-    
-    model_config = ConfigDict(env_file=".env", extra="ignore")
-    
-    # Grok Settings
-    GROK_API_KEY: str = os.getenv("GROK_API_KEY", "")
-    GROK_MODEL: str = os.getenv("GROK_MODEL", "grok-beta")
-    
-    model_config = ConfigDict(env_file=".env", extra="ignore")
+
 
 @lru_cache()
 def get_settings():
