@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatGPT Clone — Presentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #07070d;
+    --bg2: #0e0e18;
+    --surface: #14142a;
+    --surface2: #1c1c3a;
+    --border: #2a2a4a;
+    --fg: #e8e8f0;
+    --muted: #8888aa;
+    --accent: #f59e0b;
+    --accent2: #fbbf24;
+    --accent-dim: rgba(245,158,11,0.12);
+    --emerald: #10b981;
+    --rose: #f43f5e;
+    --cyan: #22d3ee;
+    --violet: #a78bfa;
+    --font-ui: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-ui);
+  }
+
+  /* ─── Presentation Container ─── */
+  #presentation {
+    width: 100%; height: 100%;
+    position: relative;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(60px);
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0s;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  /* ─── Progress Bar ─── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 100;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  /* ─── Navigation ─── */
+  #nav-controls {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(14,14,24,0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 40px;
+    padding: 8px 20px;
+  }
+
+  #nav-controls button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 18px;
+    cursor: pointer;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  #nav-controls button:hover {
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  #slide-counter {
+    font-size: 13px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    min-width: 50px;
+    text-align: center;
+  }
+
+  /* ─── Speaker Notes Toggle ─── */
+  #notes-toggle {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    background: rgba(14,14,24,0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 42px; height: 42px;
+    color: var(--muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  #notes-toggle:hover { color: var(--accent); background: var(--accent-dim); }
+  #notes-toggle.active { color: var(--accent); border-color: var(--accent); }
+
+  #speaker-notes {
+    position: fixed;
+    bottom: 80px;
+    right: 30px;
+    width: 380px;
+    max-height: 260px;
+    overflow-y: auto;
+    background: rgba(14,14,24,0.95);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--muted);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  #speaker-notes.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  #speaker-notes strong { color: var(--accent); font-weight: 600; }
+
+  /* ─── Typography ─── */
+  h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 700; line-height: 1.1; letter-spacing: -1.5px; }
+  h2 { font-size: clamp(28px, 3.5vw, 44px); font-weight: 700; line-height: 1.15; letter-spacing: -1px; }
+  h3 { font-size: clamp(18px, 2vw, 24px); font-weight: 600; line-height: 1.3; }
+  h4 { font-size: 16px; font-weight: 600; }
+
+  .accent { color: var(--accent); }
+  .muted { color: var(--muted); }
+  .mono { font-family: var(--font-mono); }
+
+  .subtitle {
+    font-size: clamp(16px, 1.8vw, 22px);
+    color: var(--muted);
+    font-weight: 300;
+    margin-top: 12px;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-amber { background: var(--accent-dim); color: var(--accent); }
+  .tag-emerald { background: rgba(16,185,129,0.12); color: var(--emerald); }
+  .tag-rose { background: rgba(244,63,94,0.12); color: var(--rose); }
+  .tag-cyan { background: rgba(34,211,238,0.12); color: var(--cyan); }
+  .tag-violet { background: rgba(167,139,250,0.12); color: var(--violet); }
+
+  /* ─── Cards & Layout ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    transition: border-color 0.25s, transform 0.25s;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; width: 100%; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 16px; width: 100%; }
+
+  .flex-row { display: flex; gap: 24px; width: 100%; align-items: flex-start; }
+  .flex-col { display: flex; flex-direction: column; gap: 16px; }
+  .flex-center { display: flex; align-items: center; justify-content: center; }
+
+  /* ─── Code Block ─── */
+  .code-block {
+    background: #0c0c1a;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    width: 100%;
+    color: #c8c8e0;
+    position: relative;
+  }
+
+  .code-block .kw { color: var(--rose); }
+  .code-block .fn { color: #60a5fa; }
+  .code-block .str { color: var(--emerald); }
+  .code-block .cm { color: #555580; font-style: italic; }
+  .code-block .num { color: var(--accent); }
+  .code-block .type { color: var(--cyan); }
+  .code-block .decorator { color: var(--violet); }
+
+  .code-label {
+    position: absolute;
+    top: 8px; right: 12px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ─── Stat Box ─── */
+  .stat-box {
+    text-align: center;
+    padding: 20px;
+  }
+  .stat-box .stat-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-mono);
+  }
+  .stat-box .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ─── Flow Arrow ─── */
+  .flow-arrow {
+    color: var(--accent);
+    font-size: 20px;
+    margin: 0 4px;
+    flex-shrink: 0;
+  }
+
+  /* ─── Feature List ─── */
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--fg);
+  }
+
+  .feature-list li .icon {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    margin-top: 3px;
+  }
+
+  .icon-check { background: rgba(16,185,129,0.15); color: var(--emerald); }
+  .icon-bolt { background: var(--accent-dim); color: var(--accent); }
+  .icon-shield { background: rgba(34,211,238,0.12); color: var(--cyan); }
+
+  /* ─── Diagram Styles ─── */
+  .diagram-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .diagram-box.highlighted {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-dim);
+  }
+
+  .diagram-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 20px;
+  }
+
+  .diagram-connector.vertical {
+    flex-direction: column;
+    padding: 4px 0;
+  }
+
+  /* ─── Table ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .data-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(42,42,74,0.5);
+    color: var(--fg);
+  }
+
+  .data-table tr:hover td { background: rgba(245,158,11,0.04); }
+
+  .data-table code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: rgba(245,158,11,0.08);
+    color: var(--accent2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  /* ─── Timeline ─── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--border));
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 16px 0 16px 20px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 22px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-dim);
+  }
+
+  .timeline-item .phase { font-size: 11px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .timeline-item .title { font-size: 16px; font-weight: 600; margin-top: 4px; }
+  .timeline-item .desc { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+  /* ─── Background Effects ─── */
+  .bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* ─── Animated Dots Pattern ─── */
+  .dot-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(245,158,11,0.06) 1px, transparent 1px);
+    background-size: 30px 30px;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* ─── Endpoint Row ─── */
+  .endpoint-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.2s;
+  }
+  .endpoint-row:hover { border-color: var(--accent); }
+
+  .method-badge {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 52px;
+    text-align: center;
+  }
+  .method-get { background: rgba(16,185,129,0.15); color: var(--emerald); }
+  .method-post { background: rgba(34,211,238,0.12); color: var(--cyan); }
+  .method-patch { background: var(--accent-dim); color: var(--accent); }
+  .method-delete { background: rgba(244,63,94,0.12); color: var(--rose); }
+
+  .endpoint-path { font-family: var(--font-mono); font-size: 13px; color: var(--fg); }
+  .endpoint-desc { font-size: 12px; color: var(--muted); margin-left: auto; }
+
+  /* ─── Provider Card ─── */
+  .provider-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .provider-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .provider-card.primary::before { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .provider-card.secondary::before { background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ─── Entrance Animations ─── */
+  .slide.active .anim-up {
+    animation: slideUp 0.6s ease forwards;
+  }
+
+  .slide.active .anim-up-d1 { animation-delay: 0.1s; }
+  .slide.active .anim-up-d2 { animation-delay: 0.2s; }
+  .slide.active .anim-up-d3 { animation-delay: 0.3s; }
+  .slide.active .anim-up-d4 { animation-delay: 0.4s; }
+  .slide.active .anim-up-d5 { animation-delay: 0.5s; }
+
+  .anim-up {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .float-anim { animation: float 4s ease-in-out infinite; }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 900px) {
+    .slide { padding: 40px 30px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .flex-row { flex-direction: column; }
+    #speaker-notes { width: 300px; right: 10px; }
+  }
+
+  /* ─── Reduced Motion ─── */
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: opacity 0.2s; transform: none !important; }
+    .slide.active .anim-up { animation: none; opacity: 1; transform: none; }
+    .float-anim { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<div id="presentation">
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 1: Cover -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide active" data-notes="<strong>Welcome and introduction.</strong> This presentation covers the complete architecture, implementation, and deployment strategy for a full-stack ChatGPT clone built with Flutter and FastAPI. The project demonstrates production-grade patterns including JWT authentication, multi-provider LLM integration with intelligent fallback, and cross-platform deployment. Emphasize that this is not a toy project — it's a deployment-ready application with proper security, error handling, and scalability considerations.">
+    <div class="dot-pattern"></div>
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(245,158,11,0.06);top:-100px;right:-100px;"></div>
+    <div class="bg-glow" style="width:400px;height:400px;background:rgba(34,211,238,0.04);bottom:-80px;left:-80px;"></div>
+
+    <div style="text-align:center;max-width:900px;width:100%;" class="flex-col">
+      <div class="anim-up" style="display:flex;gap:10px;justify-content:center;margin-bottom:20px;">
+        <span class="tag tag-amber">Flutter 3.0+</span>
+        <span class="tag tag-cyan">FastAPI</span>
+        <span class="tag tag-emerald">Full-Stack</span>
+      </div>
+      <h1 class="anim-up anim-up-d1" style="text-align:center;">
+        ChatGPT Clone<br><span class="accent">Mobile & Desktop</span> Application
+      </h1>
+      <p class="subtitle anim-up anim-up-d2" style="text-align:center;">
+        Production-grade AI chatbot with multi-provider LLM integration,<br>
+        JWT authentication, and cross-platform support
+      </p>
+      <div class="anim-up anim-up-d3" style="margin-top:30px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;">
+          <i class="fa-brands fa-github"></i>
+          <span class="mono" style="font-size:12px;">issam-belkadia/chatgpt-clone</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;">
+          <i class="fa-solid fa-server"></i> Port 8000
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px;">
+          <i class="fa-solid fa-layer-group"></i> 11 Endpoints
+        </div>
+      </div>
+      <div class="anim-up anim-up-d4" style="margin-top:40px;display:flex;gap:12px;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+          <i class="fa-brands fa-android" style="color:var(--emerald);"></i>
+          <i class="fa-brands fa-apple" style="color:var(--fg);"></i>
+          <i class="fa-brands fa-chrome" style="color:var(--cyan);"></i>
+          <i class="fa-brands fa-linux" style="color:var(--accent);"></i>
+          <i class="fa-brands fa-windows" style="color:var(--violet);"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 2: Problem Statement -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Why build a ChatGPT clone?</strong> The AI revolution has made conversational AI essential, but relying on a single provider creates vendor lock-in and availability risks. Users need a self-hosted, customizable solution that works across all their devices. Existing open-source options often lack production readiness — missing proper auth, no fallback mechanisms, poor error handling. Our project addresses all these gaps with a full-stack, deployment-ready architecture.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-rose">Problem</span>
+        <h2 style="margin-top:12px;">Why Build a ChatGPT Clone?</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:32px;">
+        <div class="card" style="border-left:3px solid var(--rose);">
+          <h4 style="color:var(--rose);margin-bottom:8px;"><i class="fa-solid fa-triangle-exclamation"></i> Vendor Lock-in</h4>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;">Relying on a single AI provider means service outages directly impact your users. No redundancy, no fallback.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--rose);">
+          <h4 style="color:var(--rose);margin-bottom:8px;"><i class="fa-solid fa-lock"></i> Limited Customization</h4>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;">Third-party platforms don't allow custom auth flows, branding, conversation persistence, or model switching.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--rose);">
+          <h4 style="color:var(--rose);margin-bottom:8px;"><i class="fa-solid fa-mobile-screen"></i> Fragmented UX</h4>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;">Users switch between web, mobile, and desktop — most AI tools only work well on one platform.</p>
+        </div>
+        <div class="card" style="border-left:3px solid var(--rose);">
+          <h4 style="color:var(--rose);margin-bottom:8px;"><i class="fa-solid fa-shield-halved"></i> Data Privacy</h4>
+          <p style="font-size:14px;color:var(--muted);line-height:1.6;">Sending conversations through third-party services raises compliance and privacy concerns for organizations.</p>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d2" style="margin-top:28px;padding:20px 28px;background:var(--accent-dim);border:1px solid rgba(245,158,11,0.2);border-radius:10px;display:flex;align-items:center;gap:14px;">
+        <i class="fa-solid fa-lightbulb" style="color:var(--accent);font-size:22px;"></i>
+        <p style="font-size:15px;line-height:1.6;"><strong class="accent">Our Solution:</strong> A self-hosted, full-stack ChatGPT clone with multi-provider LLM fallback, JWT-secured API, cross-platform Flutter UI, and production-ready deployment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 3: Solution Overview -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Architecture at a glance.</strong> The system follows a clean client-server architecture. FastAPI serves as the backend on port 8000, handling auth, conversation management, and LLM orchestration. Flutter provides the cross-platform frontend. Communication is RESTful over HTTP with JWT bearer tokens. The key architectural decision is the LLM service layer — it abstracts multiple providers behind a single interface, giving us redundancy and flexibility.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-emerald">Architecture</span>
+        <h2 style="margin-top:12px;">Solution Overview</h2>
+      </div>
+
+      <!-- Architecture Diagram -->
+      <div class="anim-up anim-up-d1" style="margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;">
+        <!-- Client Layer -->
+        <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+          <div class="diagram-box" style="border-color:var(--emerald);"><i class="fa-brands fa-android" style="color:var(--emerald);margin-right:6px;"></i> Android</div>
+          <div class="diagram-box" style="border-color:var(--emerald);"><i class="fa-brands fa-apple" style="color:var(--emerald);margin-right:6px;"></i> iOS</div>
+          <div class="diagram-box" style="border-color:var(--emerald);"><i class="fa-brands fa-chrome" style="color:var(--emerald);margin-right:6px;"></i> Web</div>
+          <div class="diagram-box" style="border-color:var(--emerald);"><i class="fa-brands fa-linux" style="color:var(--emerald);margin-right:6px;"></i> Desktop</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;">Flutter 3.0+ Cross-Platform</div>
+
+        <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+        <div style="font-size:11px;color:var(--accent);font-family:var(--font-mono);">REST API + JWT Bearer Tokens</div>
+        <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+
+        <!-- Backend Layer -->
+        <div class="diagram-box highlighted" style="min-width:300px;">
+          <i class="fa-solid fa-server" style="color:var(--accent);margin-right:8px;"></i>
+          FastAPI Backend <span class="muted" style="font-size:12px;">(Port 8000)</span>
+        </div>
+
+        <div style="display:flex;gap:40px;align-items:flex-start;margin-top:4px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="diagram-connector vertical"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="diagram-box"><i class="fa-solid fa-database" style="color:var(--cyan);margin-right:6px;"></i> SQLAlchemy + SQLite</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="diagram-connector vertical"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="diagram-box"><i class="fa-solid fa-key" style="color:var(--accent);margin-right:6px;"></i> JWT Auth</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <div class="diagram-connector vertical"><i class="fa-solid fa-arrow-down"></i></div>
+            <div class="diagram-box" style="border-color:var(--violet);"><i class="fa-solid fa-brain" style="color:var(--violet);margin-right:6px;"></i> LLM Service</div>
+            <div style="display:flex;gap:10px;">
+              <div class="diagram-box" style="font-size:11px;border-color:var(--accent);">Gemini</div>
+              <div class="diagram-box" style="font-size:11px;border-color:var(--cyan);">Groq</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 4: Backend Architecture -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Backend deep dive.</strong> FastAPI was chosen for its async capabilities, automatic documentation generation, and type safety with Pydantic. The backend is structured around clean separation of concerns: auth handling, CRUD operations, LLM service abstraction, and configuration management. Every endpoint is documented automatically via Swagger UI at /docs. SQLAlchemy provides ORM-level SQL injection prevention and easy database switching from SQLite to PostgreSQL.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-cyan">Backend</span>
+        <h2 style="margin-top:12px;">FastAPI Architecture</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="flex-col">
+          <div class="card">
+            <h4 style="color:var(--cyan);margin-bottom:12px;"><i class="fa-solid fa-cubes"></i> Core Components</h4>
+            <ul class="feature-list">
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>FastAPI 0.104.1 with Uvicorn async server</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>SQLAlchemy ORM with SQLite / PostgreSQL</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>JWT authentication (access + refresh tokens)</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Automatic Swagger UI + ReDoc documentation</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>CORS middleware for frontend integration</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Pydantic schemas for request/response validation</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-folder-tree"></i> Project Structure</h4>
+            <div class="code-block" style="font-size:12px;line-height:1.8;">
+<span class="cm">gpt_server/</span>
+├── main.py          <span class="cm"># Routes & app config</span>
+├── models.py        <span class="cm"># SQLAlchemy models</span>
+├── auth.py          <span class="cm"># JWT & password hashing</span>
+├── config.py        <span class="cm"># Environment settings</span>
+├── llm_service.py   <span class="cm"># Multi-provider LLM</span>
+├── database.py      <span class="cm"># DB connection setup</span>
+└── requirements.txt
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-col">
+          <div class="card" style="flex:1;">
+            <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-gear"></i> Configuration (config.py)</h4>
+            <div class="code-block" style="font-size:12px;line-height:1.8;">
+<span class="kw">class</span> <span class="type">Settings</span>:
+    APP_NAME: <span class="type">str</span> = <span class="str">"ChatGPT Clone"</span>
+    VERSION: <span class="type">str</span> = <span class="str">"1.0.0"</span>
+    DEBUG: <span class="type">bool</span> = <span class="kw">True</span>
+
+    <span class="cm"># Database</span>
+    DATABASE_URL: <span class="type">str</span> = <span class="str">"sqlite:///./chat.db"</span>
+
+    <span class="cm"># JWT</span>
+    SECRET_KEY: <span class="type">str</span>  <span class="cm"># from env</span>
+    ALGORITHM: <span class="type">str</span> = <span class="str">"HS256"</span>
+    ACCESS_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">30</span>  <span class="cm"># minutes</span>
+    REFRESH_TOKEN_EXPIRE: <span class="type">int</span> = <span class="num">7</span>   <span class="cm"># days</span>
+
+    <span class="cm"># LLM Providers</span>
+    GEMINI_API_KEY: <span class="type">str</span>
+    GEMINI_MODEL: <span class="type">str</span>
+    GROQ_API_KEY: <span class="type">str</span>
+    GROQ_MODEL: <span class="type">str</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 5: Frontend Design -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Frontend architecture.</strong> Flutter was chosen for true cross-platform support from a single codebase. Provider handles state management with three main notifiers: AuthProvider for login/register flows, ConversationProvider for listing and managing chats, and ChatProvider for real-time message handling. The UI follows a dark ChatGPT-inspired theme. All API calls go through a centralized ApiService wrapper that handles token attachment and error parsing.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-violet">Frontend</span>
+        <h2 style="margin-top:12px;">Flutter Application Design</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="flex-col">
+          <div class="card">
+            <h4 style="color:var(--violet);margin-bottom:12px;"><i class="fa-solid fa-sitemap"></i> Project Structure</h4>
+            <div class="code-block" style="font-size:12px;line-height:1.8;">
+<span class="cm">lib/</span>
+├── main.dart             <span class="cm"># MultiProvider setup</span>
+├── screens/
+│   ├── login_screen.dart
+│   ├── register_screen.dart
+│   ├── chat_screen.dart
+│   └── conversations_screen.dart
+├── providers/
+│   ├── auth_provider.dart
+│   ├── conversation_provider.dart
+│   └── chat_provider.dart
+├── models/               <span class="cm"># JSON serializable</span>
+└── services/
+    └── api_service.dart  <span class="cm"># HTTP wrapper</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-palette"></i> UI/UX Features</h4>
+            <ul class="feature-list">
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Dark ChatGPT-like interface</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Responsive: mobile-first + desktop</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Smooth loading animations (Spinkit)</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Toast notifications for feedback</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Offline token caching</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col">
+          <div class="card" style="flex:1;">
+            <h4 style="color:var(--accent);margin-bottom:16px;"><i class="fa-solid fa-boxes-stacked"></i> Key Dependencies</h4>
+            <table class="data-table">
+              <thead>
+                <tr><th>Package</th><th>Version</th><th>Purpose</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><code>http</code></td><td>1.1.0</td><td>HTTP requests</td></tr>
+                <tr><td><code>provider</code></td><td>6.0.0</td><td>State management</td></tr>
+                <tr><td><code>shared_preferences</code></td><td>2.2.0</td><td>Local storage</td></tr>
+                <tr><td><code>flutter_spinkit</code></td><td>5.2.0</td><td>Loading animations</td></tr>
+                <tr><td><code>fluttertoast</code></td><td>8.2.0</td><td>Toast notifications</td></tr>
+                <tr><td><code>cached_network_image</code></td><td>3.3.0</td><td>Image caching</td></tr>
+                <tr><td><code>intl</code></td><td>0.19.0</td><td>Text formatting</td></tr>
+                <tr><td><code>json_annotation</code></td><td>4.8.0</td><td>JSON serialization</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="tag tag-violet">Provider Pattern</div>
+            <div class="tag tag-emerald">ChangeNotifier</div>
+            <div class="tag tag-amber">6 Platforms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 6: Authentication Flow -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Security deep dive.</strong> Authentication uses industry-standard patterns: bcrypt for password hashing with the 72-byte limit enforced, and JWT for stateless token-based auth. We issue both access tokens (30-minute expiry) and refresh tokens (7-day expiry). The OAuth2 Bearer scheme is used for all protected endpoints. Passwords are never stored in plaintext — only bcrypt hashes. The 72-byte limit prevents bcrypt's known length-based attack vector.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-amber">Security</span>
+        <h2 style="margin-top:12px;">Authentication System</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="flex-col">
+          <div class="card">
+            <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-shield-halved"></i> JWT Token Flow</h4>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:12px;">
+              <div class="diagram-box" style="border-color:var(--cyan);width:100%;">User submits credentials</div>
+              <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+              <div class="diagram-box" style="width:100%;">Bcrypt password verification</div>
+              <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+              <div class="diagram-box highlighted" style="width:100%;">JWT tokens generated (access + refresh)</div>
+              <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+              <div style="display:flex;gap:12px;width:100%;">
+                <div class="diagram-box" style="flex:1;border-color:var(--emerald);">
+                  <div style="font-size:11px;color:var(--emerald);">Access Token</div>
+                  <div class="mono" style="font-size:18px;font-weight:700;color:var(--emerald);">30m</div>
+                </div>
+                <div class="diagram-box" style="flex:1;border-color:var(--accent);">
+                  <div style="font-size:11px;color:var(--accent);">Refresh Token</div>
+                  <div class="mono" style="font-size:18px;font-weight:700;color:var(--accent);">7d</div>
+                </div>
+              </div>
+              <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+              <div class="diagram-box" style="width:100%;">Tokens stored locally on device</div>
+              <div class="diagram-connector"><i class="fa-solid fa-arrow-down"></i></div>
+              <div class="diagram-box" style="width:100%;">Bearer token attached to every API request</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-col">
+          <div class="card">
+            <h4 style="color:var(--cyan);margin-bottom:12px;"><i class="fa-solid fa-code"></i> Auth Implementation</h4>
+            <div class="code-block" style="font-size:12px;line-height:1.7;">
+<span class="decorator">@router.post</span>(<span class="str">"/auth/login"</span>)
+<span class="kw">async def</span> <span class="fn">login</span>(form_data: OAuth2PasswordRequestForm):
+    user = <span class="kw">await</span> <span class="fn">authenticate_user</span>(
+        form_data.username,
+        form_data.password
+    )
+    <span class="kw">if not</span> user:
+        <span class="kw">raise</span> HTTPException(
+            status_code=<span class="num">401</span>,
+            detail=<span class="str">"Invalid credentials"</span>
+        )
+    access_token = <span class="fn">create_access_token</span>(
+        data={<span class="str">"sub"</span>: user.username}
+    )
+    refresh_token = <span class="fn">create_refresh_token</span>(
+        data={<span class="str">"sub"</span>: user.username}
+    )
+    <span class="kw">return</span> {
+        <span class="str">"access_token"</span>: access_token,
+        <span class="str">"refresh_token"</span>: refresh_token,
+        <span class="str">"token_type"</span>: <span class="str">"bearer"</span>
+    }
+            </div>
+          </div>
+
+          <div class="card">
+            <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-lock"></i> Security Measures</h4>
+            <ul class="feature-list">
+              <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Bcrypt hashing with 72-byte limit</li>
+              <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>HS256 algorithm for JWT signing</li>
+              <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Environment-based secret key</li>
+              <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Token expiry enforcement</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 7: LLM Integration -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>The heart of the application.</strong> The LLM service is what makes this project special. It implements an intelligent fallback system: when the primary provider (Gemini) fails or returns 503/429 errors, the system automatically retries with exponential backoff (2s, 3s, 5s), then falls back to Groq. Each provider gets 3 retry attempts. If an API key isn't configured for a provider, it's skipped entirely. Message history is trimmed to the last 10 messages to optimize context windows. The 10-second timeout prevents hanging requests.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-violet">AI Engine</span>
+        <h2 style="margin-top:12px;">LLM Integration & Fallback</h2>
+      </div>
+
+      <div class="anim-up anim-up-d1" style="margin-top:24px;">
+        <div class="grid-2" style="gap:20px;">
+          <div class="provider-card primary">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span class="tag tag-amber">Primary</span>
+              <h4>Google Gemini</h4>
+            </div>
+            <ul class="feature-list" style="gap:6px;">
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>gemini-2.0-flash-exp, gemini-1.5-pro, gemini-1.5-flash</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>generativelanguage.googleapis.com/v1beta</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Configured via GEMINI_API_KEY + GEMINI_MODEL</li>
+            </ul>
+          </div>
+          <div class="provider-card secondary">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span class="tag tag-cyan">Secondary</span>
+              <h4>Groq</h4>
+            </div>
+            <ul class="feature-list" style="gap:6px;">
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>llama-3.3-70b-versatile</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>AsyncGroq client integration</li>
+              <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Configured via GROQ_API_KEY + GROQ_MODEL</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d2" style="margin-top:20px;">
+        <div class="card" style="border-color:var(--accent);">
+          <h4 style="color:var(--accent);margin-bottom:16px;"><i class="fa-solid fa-rotate"></i> Intelligent Fallback Mechanism</h4>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+            <div class="diagram-box highlighted">User Message</div>
+            <span class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="border-color:var(--accent);">Try Gemini (3x)</div>
+            <span class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+              <div class="tag tag-rose" style="font-size:10px;">503 / 429 Error</div>
+              <div class="mono" style="font-size:11px;color:var(--muted);">2s → 3s → 5s backoff</div>
+            </div>
+            <span class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="border-color:var(--cyan);">Try Groq (3x)</div>
+            <span class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="border-color:var(--emerald);">AI Response</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d3 grid-4" style="margin-top:16px;">
+        <div class="card stat-box">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Retries per provider</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">10s</div>
+          <div class="stat-label">Request timeout</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">10</div>
+          <div class="stat-label">Messages in context</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">2s-5s</div>
+          <div class="stat-label">Backoff delays</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 8: Database Schema -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Data model.</strong> Three core entities with clear relationships: User has many Conversations (one-to-many), Conversation has many Messages (one-to-many). Cascade deletion ensures when a user is deleted, all their conversations and messages go too. SQLAlchemy ORM prevents SQL injection and makes it trivial to switch from SQLite to PostgreSQL for production. Timestamps on all entities enable audit trails and sorting.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-cyan">Data Layer</span>
+        <h2 style="margin-top:12px;">Database Schema</h2>
+      </div>
+
+      <div class="anim-up anim-up-d1" style="margin-top:28px;display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;justify-content:center;">
+        <!-- User Entity -->
+        <div class="card" style="flex:1;min-width:280px;max-width:340px;border-top:3px solid var(--accent);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <i class="fa-solid fa-user" style="color:var(--accent);"></i>
+            <h4 style="color:var(--accent);">User</h4>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">id</span><span class="tag tag-amber" style="font-size:9px;">PK</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">username</span><span class="tag tag-rose" style="font-size:9px;">UNIQUE</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">email</span><span class="tag tag-rose" style="font-size:9px;">UNIQUE</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">hashed_password</span><span style="font-size:10px;color:var(--muted);">str</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">is_active</span><span style="font-size:10px;color:var(--muted);">bool</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">created_at / updated_at</span><span style="font-size:10px;color:var(--muted);">datetime</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversation Entity -->
+        <div class="card" style="flex:1;min-width:280px;max-width:340px;border-top:3px solid var(--emerald);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <i class="fa-solid fa-comments" style="color:var(--emerald);"></i>
+            <h4 style="color:var(--emerald);">Conversation</h4>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">id</span><span class="tag tag-amber" style="font-size:9px;">PK</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">title</span><span style="font-size:10px;color:var(--muted);">str</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">user_id</span><span class="tag tag-cyan" style="font-size:9px;">FK → User</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">created_at / updated_at</span><span style="font-size:10px;color:var(--muted);">datetime</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Entity -->
+        <div class="card" style="flex:1;min-width:280px;max-width:340px;border-top:3px solid var(--violet);">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+            <i class="fa-solid fa-message" style="color:var(--violet);"></i>
+            <h4 style="color:var(--violet);">Message</h4>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">id</span><span class="tag tag-amber" style="font-size:9px;">PK</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">conversation_id</span><span class="tag tag-cyan" style="font-size:9px;">FK → Conversation</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">role</span><span style="font-size:10px;color:var(--muted);">user | assistant</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">content</span><span style="font-size:10px;color:var(--muted);">text</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:6px 10px;background:var(--bg2);border-radius:4px;">
+              <span class="mono" style="color:var(--fg);">created_at</span><span style="font-size:10px;color:var(--muted);">datetime</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d2" style="margin-top:20px;padding:16px 24px;background:var(--surface);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <span style="color:var(--accent);font-weight:600;">User</span>
+        <span class="mono" style="color:var(--muted);font-size:12px;">1 ──── ∞</span>
+        <span style="color:var(--emerald);font-weight:600;">Conversation</span>
+        <span class="mono" style="color:var(--muted);font-size:12px;">1 ──── ∞</span>
+        <span style="color:var(--violet);font-weight:600;">Message</span>
+        <span style="color:var(--muted);margin-left:12px;font-size:13px;">| Cascade delete enabled</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 9: API Endpoints -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Complete API surface.</strong> 11 RESTful endpoints organized into three groups: Auth (register, login, me), Conversations (CRUD + list), and Chat (send message). All endpoints except register and login require JWT bearer token. The chat endpoint accepts optional parameters like temperature and max_tokens for model control. Automatic Swagger docs at /docs make testing trivial during development.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-emerald">API</span>
+        <h2 style="margin-top:12px;">RESTful API Endpoints</h2>
+      </div>
+
+      <div class="anim-up anim-up-d1" style="margin-top:24px;display:flex;flex-direction:column;gap:10px;">
+        <h4 style="color:var(--cyan);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;"><i class="fa-solid fa-key"></i> Authentication</h4>
+        <div class="endpoint-row">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/api/v1/auth/register</span>
+          <span class="endpoint-desc">Create new account</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/api/v1/auth/login</span>
+          <span class="endpoint-desc">OAuth2 form login, returns tokens</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/api/v1/auth/me</span>
+          <span class="endpoint-desc">Get current user (Bearer token)</span>
+        </div>
+
+        <h4 style="color:var(--emerald);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-top:12px;margin-bottom:2px;"><i class="fa-solid fa-comments"></i> Conversations</h4>
+        <div class="endpoint-row">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/api/v1/conversations</span>
+          <span class="endpoint-desc">List user conversations (paginated)</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/api/v1/conversations</span>
+          <span class="endpoint-desc">Create new conversation</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-get">GET</span>
+          <span class="endpoint-path">/api/v1/conversations/{id}</span>
+          <span class="endpoint-desc">Get conversation with messages</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-patch">PATCH</span>
+          <span class="endpoint-path">/api/v1/conversations/{id}</span>
+          <span class="endpoint-desc">Update conversation title</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="method-badge method-delete">DEL</span>
+          <span class="endpoint-path">/api/v1/conversations/{id}</span>
+          <span class="endpoint-desc">Delete conversation</span>
+        </div>
+
+        <h4 style="color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:1px;margin-top:12px;margin-bottom:2px;"><i class="fa-solid fa-brain"></i> Chat</h4>
+        <div class="endpoint-row">
+          <span class="method-badge method-post">POST</span>
+          <span class="endpoint-path">/api/v1/chat</span>
+          <span class="endpoint-desc">Send message, get AI response (temperature, max_tokens optional)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 10: Deployment Strategy -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Production deployment.</strong> The backend deploys with Gunicorn managing Uvicorn workers for production-grade async performance. PostgreSQL replaces SQLite for production workloads. Nginx serves as reverse proxy with SSL termination. Critical production steps: change SECRET_KEY, set DEBUG=False, restrict CORS origins, and set up SSL/TLS. Flutter builds to 6 platforms from a single codebase — web, Android, iOS, macOS, Linux, and Windows.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-amber">Deployment</span>
+        <h2 style="margin-top:12px;">Deployment Strategy</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="flex-col">
+          <div class="card" style="border-top:3px solid var(--accent);">
+            <h4 style="color:var(--accent);margin-bottom:14px;"><i class="fa-solid fa-server"></i> Backend Production</h4>
+            <div class="code-block" style="font-size:12px;line-height:1.7;">
+<span class="cm"># Deploy with Gunicorn + Uvicorn workers</span>
+gunicorn -w <span class="num">4</span> \
+  -k uvicorn.workers.UvicornWorker \
+  main:app
+
+<span class="cm"># Production .env</span>
+DATABASE_URL=<span class="str">postgresql://user:pass@host:5432/chatgpt</span>
+SECRET_KEY=<span class="str">&lt;secure-random-value&gt;</span>
+DEBUG=<span class="kw">False</span>
+CORS_ORIGINS=<span class="str">https://yourdomain.com</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-list-check"></i> Production Checklist</h4>
+            <ul class="feature-list">
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Set up PostgreSQL database</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Change SECRET_KEY to secure random value</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Set DEBUG=False</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Configure Nginx reverse proxy</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Set up SSL/TLS certificate</li>
+              <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Restrict CORS origins</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex-col">
+          <div class="card" style="border-top:3px solid var(--violet);">
+            <h4 style="color:var(--violet);margin-bottom:14px;"><i class="fa-solid fa-mobile-screen-button"></i> Flutter Build Targets</h4>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-chrome" style="color:var(--cyan);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">Web</span>
+                <code style="font-size:11px;">flutter build web --release</code>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-android" style="color:var(--emerald);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">Android</span>
+                <code style="font-size:11px;">flutter build apk</code>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-apple" style="color:var(--fg);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">iOS</span>
+                <code style="font-size:11px;">flutter build ios</code>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-apple" style="color:var(--fg);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">macOS</span>
+                <code style="font-size:11px;">flutter build macos</code>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-linux" style="color:var(--accent);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">Linux</span>
+                <code style="font-size:11px;">flutter build linux</code>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg2);border-radius:8px;">
+                <i class="fa-brands fa-windows" style="color:var(--violet);width:20px;text-align:center;"></i>
+                <span style="font-size:13px;flex:1;">Windows</span>
+                <code style="font-size:11px;">flutter build windows</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 11: Security Considerations -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Security in depth.</strong> We implemented multiple layers of security: bcrypt hashing prevents rainbow table attacks, JWT tokens eliminate server-side session storage (stateless auth), SQLAlchemy ORM prevents SQL injection by parameterizing all queries, CORS protection limits cross-origin access, and the 72-byte bcrypt limit prevents the known length extension attack. For production, rate limiting and 2FA should be added — these are on our roadmap.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-rose">Security</span>
+        <h2 style="margin-top:12px;">Security Considerations</h2>
+      </div>
+
+      <div class="grid-3 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(244,63,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-fingerprint" style="color:var(--rose);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Password Security</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Bcrypt hashing with salt. 72-byte limit enforcement prevents length-based attacks.</p>
+        </div>
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-key" style="color:var(--accent);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">JWT Authentication</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Stateless auth with dual tokens. HS256 signing with env-based secret. Token expiry enforced.</p>
+        </div>
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(34,211,238,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--cyan);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Injection Prevention</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">SQLAlchemy ORM parameterizes all queries. No raw SQL. SQL injection eliminated by design.</p>
+        </div>
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(16,185,129,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-globe" style="color:var(--emerald);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">CORS Protection</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Configurable origins. Production restricts to frontend domain only. Dev mode allows all.</p>
+        </div>
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(167,139,250,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-clock-rotate-left" style="color:var(--violet);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Token Expiry</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">Access tokens expire in 30 min. Refresh tokens in 7 days. Limits exposure window on compromise.</p>
+        </div>
+        <div class="card" style="text-align:center;padding:28px 20px;">
+          <div style="width:50px;height:50px;border-radius:12px;background:rgba(244,63,94,0.12);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i class="fa-solid fa-lock" style="color:var(--rose);font-size:22px;"></i>
+          </div>
+          <h4 style="margin-bottom:6px;">Environment Secrets</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5;">All secrets via environment variables. Never hardcoded. Production SECRET_KEY must be changed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 12: Performance & Scalability -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Built to scale.</strong> The architecture is designed for horizontal scaling from the start. FastAPI's async/await pattern handles concurrent requests efficiently. The API is stateless — all state lives in the database or JWT tokens, so you can add more workers behind a load balancer. The LLM service's fallback mechanism ensures availability even when providers go down. SQLAlchemy connection pooling and message trimming (last 10) optimize resource usage.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-emerald">Performance</span>
+        <h2 style="margin-top:12px;">Scalability & Optimization</h2>
+      </div>
+
+      <div class="anim-up anim-up-d1 grid-4" style="margin-top:28px;">
+        <div class="card stat-box">
+          <div class="stat-value" style="color:var(--emerald);">4</div>
+          <div class="stat-label">Gunicorn workers</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="color:var(--cyan);">Async</div>
+          <div class="stat-label">I/O pattern</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="color:var(--violet);">0</div>
+          <div class="stat-label">Server-side sessions</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="color:var(--accent);">2</div>
+          <div class="stat-label">LLM providers</div>
+        </div>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d2" style="margin-top:20px;">
+        <div class="card">
+          <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-expand"></i> Scalability</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Async/await throughout (FastAPI + Groq client)</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>SQLAlchemy connection pooling</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Stateless API — horizontal scaling ready</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>LLM provider redundancy with automatic failover</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Context window optimization (last 10 messages)</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Exponential backoff prevents provider hammering</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-gauge-high"></i> Performance Patterns</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>10-second request timeout prevents hanging</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Message trimming reduces LLM token costs</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Comprehensive logging for bottleneck detection</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Provider skip if API key not configured</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Paginated conversation listing (skip/limit)</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Offline token caching in Flutter client</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 13: Demo / Data Flow -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Live data flow walkthrough.</strong> This slide shows how data moves through the system for three key flows. Registration: user input goes through Flutter validation, hits the API, creates the database record, and returns JWT tokens. Chat: the message traverses from the Flutter UI through the API, gets stored in the database, then goes to the LLM service which tries providers in order, and the response flows back. Conversations: simple CRUD operations with pagination support.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-cyan">Data Flow</span>
+        <h2 style="margin-top:12px;">How Data Moves Through the System</h2>
+      </div>
+
+      <div class="flex-col anim-up anim-up-d1" style="margin-top:28px;gap:24px;">
+        <!-- Registration Flow -->
+        <div class="card" style="border-left:3px solid var(--emerald);">
+          <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-user-plus"></i> User Registration</h4>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <div class="diagram-box" style="font-size:12px;">User Input</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">Register Screen</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">ApiService</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box highlighted" style="font-size:12px;">/auth/register</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">Bcrypt Hash</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">DB Create</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;border-color:var(--emerald);">JWT Tokens</div>
+          </div>
+        </div>
+
+        <!-- Chat Flow -->
+        <div class="card" style="border-left:3px solid var(--accent);">
+          <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-message"></i> Message Processing</h4>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <div class="diagram-box" style="font-size:12px;">User Message</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">ChatProvider</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box highlighted" style="font-size:12px;">/chat</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">Store in DB</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;border-color:var(--violet);">LLM Service</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">AI Response</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;border-color:var(--emerald);">UI Update</div>
+          </div>
+        </div>
+
+        <!-- Conversation Flow -->
+        <div class="card" style="border-left:3px solid var(--violet);">
+          <h4 style="color:var(--violet);margin-bottom:12px;"><i class="fa-solid fa-comments"></i> Conversation Management</h4>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <div class="diagram-box" style="font-size:12px;">ConversationsScreen</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">ConversationProvider</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box highlighted" style="font-size:12px;">/conversations</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;">DB Query (paginated)</div>
+            <span class="flow-arrow" style="font-size:14px;"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="diagram-box" style="font-size:12px;border-color:var(--emerald);">List Display</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 14: Timeline & Milestones -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Development timeline.</strong> Phase 1 established the foundation: FastAPI project structure, SQLAlchemy models, and JWT auth. Phase 2 connected the AI: LLM service with Gemini integration, chat endpoint, and message persistence. Phase 3 built the frontend: Flutter screens, Provider state management, and API integration. Phase 4 hardened everything: Groq fallback, error handling, cross-platform testing. Each phase built on the previous one, ensuring a working system at every stage.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:900px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-amber">Timeline</span>
+        <h2 style="margin-top:12px;">Development Milestones</h2>
+      </div>
+
+      <div class="anim-up anim-up-d1 timeline" style="margin-top:28px;">
+        <div class="timeline-item">
+          <div class="phase">Phase 1</div>
+          <div class="title">Backend Foundation</div>
+          <div class="desc">FastAPI project structure, SQLAlchemy models (User, Conversation, Message), JWT authentication system, database migrations, and config management.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="phase">Phase 2</div>
+          <div class="title">LLM Integration</div>
+          <div class="desc">Gemini API integration, chat endpoint implementation, message persistence, context window management, and initial error handling.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="phase">Phase 3</div>
+          <div class="title">Flutter Frontend</div>
+          <div class="desc">Login and register screens, conversation list and chat UI, Provider state management, API service integration, and dark theme implementation.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="phase">Phase 4</div>
+          <div class="title">Hardening & Multi-Provider</div>
+          <div class="desc">Groq fallback integration, exponential backoff retry logic, comprehensive logging, cross-platform testing, and production deployment configuration.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="phase">Current</div>
+          <div class="title">Deployment-Ready Release</div>
+          <div class="desc">Full-stack application complete. Production configuration documented. Ready for deployment with PostgreSQL, Gunicorn, and Nginx.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 15: Future Roadmap -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>What's next.</strong> The highest-impact enhancement would be message streaming — currently responses appear all at once after the LLM finishes. Streaming would dramatically improve perceived performance. After that, WebSocket support for real-time updates, Redis caching for performance, and OAuth2 social login for easier onboarding. File upload and voice input would bring feature parity with the official ChatGPT. Rate limiting and 2FA are security must-haves for production.">
+    <div class="dot-pattern"></div>
+    <div style="width:100%;max-width:1100px;" class="flex-col">
+      <div class="anim-up">
+        <span class="tag tag-violet">Roadmap</span>
+        <h2 style="margin-top:12px;">Future Enhancement Opportunities</h2>
+      </div>
+
+      <div class="grid-2 anim-up anim-up-d1" style="margin-top:28px;">
+        <div class="card" style="border-top:3px solid var(--accent);">
+          <h4 style="color:var(--accent);margin-bottom:12px;"><i class="fa-solid fa-rocket"></i> Advanced Features</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Message streaming for real-time token display</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Conversation sharing & collaboration</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>File upload (PDF, images, documents)</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Voice-to-text input</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Conversation export (PDF/Markdown)</li>
+            <li><span class="icon icon-bolt"><i class="fa-solid fa-bolt"></i></span>Custom model fine-tuning support</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-top:3px solid var(--cyan);">
+          <h4 style="color:var(--cyan);margin-bottom:12px;"><i class="fa-solid fa-gauge-high"></i> Performance</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Redis caching for frequent queries</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>WebSocket for real-time updates</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Image compression & optimization</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Database indexing for query speed</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-top:3px solid var(--emerald);">
+          <h4 style="color:var(--emerald);margin-bottom:12px;"><i class="fa-solid fa-puzzle-piece"></i> Integrations</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>OAuth2 social login (Google, GitHub)</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Stripe payment gateway</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Analytics dashboard (Mixpanel, GA4)</li>
+            <li><span class="icon icon-check"><i class="fa-solid fa-check"></i></span>Error tracking (Sentry)</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-top:3px solid var(--rose);">
+          <h4 style="color:var(--rose);margin-bottom:12px;"><i class="fa-solid fa-shield-halved"></i> Security</h4>
+          <ul class="feature-list">
+            <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Two-factor authentication (2FA)</li>
+            <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Per-user rate limiting</li>
+            <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>API key management for users</li>
+            <li><span class="icon icon-shield"><i class="fa-solid fa-shield"></i></span>Audit logging system</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- SLIDE 16: Project Stats & Q&A -->
+  <!-- ════════════════════════════════════════════ -->
+  <div class="slide" data-notes="<strong>Wrap up and Q&A.</strong> Let the numbers speak: 11 endpoints, 3 database models, 2 LLM providers with automatic fallback, 6 platform targets, and full JWT security. The project is deployment-ready and open source. Encourage questions about architecture decisions, LLM integration patterns, or deployment specifics. The repository link is available for anyone who wants to explore the code.">
+    <div class="dot-pattern"></div>
+    <div class="bg-glow" style="width:600px;height:600px;background:rgba(245,158,11,0.05);top:-150px;right:-150px;"></div>
+    <div class="bg-glow" style="width:500px;height:500px;background:rgba(34,211,238,0.04);bottom:-100px;left:-100px;"></div>
+
+    <div style="width:100%;max-width:1000px;text-align:center;" class="flex-col">
+      <div class="anim-up">
+        <h2>Project at a Glance</h2>
+        <p class="subtitle">Key metrics from development to deployment</p>
+      </div>
+
+      <div class="anim-up anim-up-d1 grid-4" style="margin-top:32px;">
+        <div class="card stat-box">
+          <div class="stat-value">11</div>
+          <div class="stat-label">RESTful Endpoints</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">3</div>
+          <div class="stat-label">Database Models</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">2</div>
+          <div class="stat-label">LLM Providers</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value">6</div>
+          <div class="stat-label">Platform Targets</div>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d2 grid-4" style="margin-top:12px;">
+        <div class="card stat-box">
+          <div class="stat-value" style="font-size:24px;color:var(--emerald);">30m</div>
+          <div class="stat-label">Access Token Expiry</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="font-size:24px;color:var(--accent);">7d</div>
+          <div class="stat-label">Refresh Token Expiry</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="font-size:24px;color:var(--cyan);">10</div>
+          <div class="stat-label">Messages in Context</div>
+        </div>
+        <div class="card stat-box">
+          <div class="stat-value" style="font-size:24px;color:var(--violet);">3</div>
+          <div class="stat-label">State Providers</div>
+        </div>
+      </div>
+
+      <div class="anim-up anim-up-d3" style="margin-top:48px;padding:32px;background:var(--surface);border:1px solid var(--border);border-radius:16px;">
+        <h2 style="font-size:clamp(28px,4vw,40px);">Questions & Discussion</h2>
+        <p class="subtitle" style="margin-top:8px;">Let's dive deeper into any aspect of the architecture</p>
+        <div style="margin-top:24px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+          <a href="https://github.com/issam-belkadia/chatgpt-clone-app-flutter-fastapi" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--accent-dim);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:var(--accent);text-decoration:none;font-weight:600;font-size:14px;transition:all 0.2s;">
+            <i class="fa-brands fa-github"></i> View on GitHub
+          </a>
+          <div style="display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:13px;">
+            <i class="fa-solid fa-book"></i> API Docs: /docs (Swagger)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation Controls -->
+<div id="nav-controls">
+  <button id="btn-prev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+  <span id="slide-counter">1 / 16</span>
+  <button id="btn-next" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
+</div>
+
+<!-- Speaker Notes Toggle -->
+<button id="notes-toggle" aria-label="Toggle speaker notes"><i class="fa-solid fa-comment-dots"></i></button>
+
+<!-- Speaker Notes Panel -->
+<div id="speaker-notes"></div>
+
+<script>
+(function() {
+  /* ─── State ─── */
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  let notesVisible = false;
+
+  const progressBar = document.getElementById('progress-bar');
+  const counter = document.getElementById('slide-counter');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const notesToggle = document.getElementById('notes-toggle');
+  const notesPanel = document.getElementById('speaker-notes');
+
+  /* ─── Update Display ─── */
+  function updateSlide(newIndex, direction) {
+    if (newIndex < 0 || newIndex >= totalSlides) return;
+
+    const oldSlide = slides[currentSlide];
+    const newSlide = slides[newIndex];
+
+    // Remove all transition classes first
+    slides.forEach(s => {
+      s.classList.remove('active', 'exit-left');
+    });
+
+    // Apply exit animation to old slide
+    if (direction === 'next') {
+      oldSlide.classList.add('exit-left');
+    }
+
+    // Activate new slide
+    newSlide.classList.add('active');
+
+    currentSlide = newIndex;
+    counter.textContent = (currentSlide + 1) + ' / ' + totalSlides;
+    progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+
+    // Update speaker notes
+    const noteContent = newSlide.getAttribute('data-notes');
+    if (noteContent) {
+      notesPanel.innerHTML = noteContent;
+    } else {
+      notesPanel.innerHTML = '<em style="color:var(--muted);">No speaker notes for this slide.</em>';
+    }
+  }
+
+  /* ─── Navigation ─── */
+  function goNext() {
+    if (currentSlide < totalSlides - 1) {
+      updateSlide(currentSlide + 1, 'next');
+    }
+  }
+
+  function goPrev() {
+    if (currentSlide > 0) {
+      updateSlide(currentSlide - 1, 'prev');
+    }
+  }
+
+  function goToSlide(index) {
+    const dir = index > currentSlide ? 'next' : 'prev';
+    updateSlide(index, dir);
+  }
+
+  /* ─── Event Listeners ─── */
+  btnNext.addEventListener('click', goNext);
+  btnPrev.addEventListener('click', goPrev);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      goNext();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      goPrev();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goToSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goToSlide(totalSlides - 1);
+    } else if (e.key === 'n' || e.key === 'N') {
+      notesToggle.click();
+    }
+  });
+
+  // Speaker notes toggle
+  notesToggle.addEventListener('click', function() {
+    notesVisible = !notesVisible;
+    notesPanel.classList.toggle('visible', notesVisible);
+    notesToggle.classList.toggle('active', notesVisible);
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  document.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  document.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 60) {
+      if (diff > 0) goNext();
+      else goPrev();
+    }
+  }, { passive: true });
+
+  /* ─── Initialize ─── */
+  // Set initial state
+  progressBar.style.width = (1 / totalSlides * 100) + '%';
+  counter.textContent = '1 / ' + totalSlides;
+
+  // Load notes for first slide
+  const firstNotes = slides[0].getAttribute('data-notes');
+  if (firstNotes) {
+    notesPanel.innerHTML = firstNotes;
+  }
+
+  // Re-trigger entrance animations for first slide
+  slides[0].querySelectorAll('.anim-up').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight; // Force reflow
+    el.style.animation = '';
+  });
+
+})();
+</script>
+
+</body>
+</html>
